@@ -84,7 +84,7 @@ The server runs at: `http://localhost:3001`
 
 ### 5. Open the Dashboard
 
-Open `Index.html` in your browser manually or via Live Server extension (for best experience).
+Open `Index.html` in your browser manually.
 
 ---
 
@@ -107,14 +107,6 @@ Open `Index.html` in your browser manually or via Live Server extension (for bes
 ├── .gitignore           # Ignores .env, node_modules, etc.
 └── README.md            # This file
 ```
-
----
-
-## Screenshots
-
-![Launch Screen](./Screenshot%202025-07-25%20013648.png)
-![Widget Menu](./Screenshot%202025-07-25%20013704.png)
-![News Cards](./Screenshot%202025-07-25%20013722.png)
 
 ---
 
