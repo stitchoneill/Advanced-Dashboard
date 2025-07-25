@@ -22,7 +22,7 @@ A sleek, interactive dashboard built with pure vanilla JavaScript, HTML, and CSS
 
 ### Main Interface
 
-![Main Interface](Screenshot_2025-07-25_013648.png)
+![Main Interface](images/Screenshot_2025-07-25_013648.png)
 
 ### Expanded Widget View
 
