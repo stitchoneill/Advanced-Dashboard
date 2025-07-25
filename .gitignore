@@ -24,3 +24,5 @@ build/
 
 # Optional: bat scripts (if not critical to share)
 *.bat
+
+echo ".env" >> .gitignore

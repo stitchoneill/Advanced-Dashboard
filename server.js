@@ -5,7 +5,7 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Allow CORS from local front-end
 app.use(cors());
@@ -19,9 +19,13 @@ app.get('/', (req, res) => {
 });
 
 // --- NewsAPI Proxy ---
-const NEWSAPI_KEY = process.env.NEWSAPI_KEY || '68f81862a6074469bd3820ea1b0a78b4';
+const NEWSAPI_KEY = process.env.NEWSAPI_KEY;
 
 app.get('/api/news', async (req, res) => {
+  if (!NEWSAPI_KEY) {
+    return res.status(500).json({ error: "Missing NewsAPI key" });
+  }
+
   const { sources, country = 'gb', category = '', q = '' } = req.query;
   let url = `https://newsapi.org/v2/top-headlines?apiKey=${NEWSAPI_KEY}`;
 
@@ -35,31 +39,29 @@ app.get('/api/news', async (req, res) => {
   if (q) url += `&q=${encodeURIComponent(q)}`;
 
   try {
-    const r = await fetch(url);
-    const j = await r.json();
-    res.json(j);
-  } catch (e) {
+    const response = await fetch(url);
+    const jsonData = await response.json();
+    res.json(jsonData);
+  } catch (error) {
+    console.error('Error fetching news:', error);
     res.status(500).json({ error: "News fetch failed" });
   }
 });
 
-// --- Crypto Proxy (CoinMarketCap Example) ---
-const CRYPTO_API_KEY = process.env.CRYPTO_API_KEY;
-
+// --- Crypto Proxy (CoinGecko Example - doesn't require API key) ---
 app.get('/api/crypto', async (req, res) => {
   try {
-    // 1. Get top 5 coins
-    const url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1';
-    const coins = await (await fetch(url)).json();
+    const coinsUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=5&page=1';
+    const coins = await (await fetch(coinsUrl)).json();
 
-    // 2. For each, get 7-day price chart
     const allCoins = await Promise.all(coins.map(async coin => {
       try {
         const chartUrl = `https://api.coingecko.com/api/v3/coins/${coin.id}/market_chart?vs_currency=usd&days=7&interval=hourly`;
         const chartData = await (await fetch(chartUrl)).json();
-        // Downsample to 50 data points max
+
         let prices = chartData.prices.map(p => p[1]);
-        while (prices.length > 50) prices = prices.filter((v, i) => i % 2 === 0);
+        while (prices.length > 50) prices = prices.filter((_, i) => i % 2 === 0);
+
         return { ...coin, prices };
       } catch {
         return { ...coin, prices: [] };
@@ -67,12 +69,13 @@ app.get('/api/crypto', async (req, res) => {
     }));
 
     res.json(allCoins);
-  } catch (e) {
+  } catch (error) {
+    console.error('Error fetching crypto:', error);
     res.status(500).json({ error: "Crypto fetch failed" });
   }
 });
 
-
+// --- Start Server ---
 app.listen(PORT, () => {
   console.log(`Server (dashboard + API) running on http://localhost:${PORT}`);
 });
